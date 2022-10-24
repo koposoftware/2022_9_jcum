@@ -3,49 +3,69 @@
 
 [프로젝트 홈페이지 - https://github.com/koposoftware/2022_9_jcum/)
 
-# 1. 프로젝트 개요
+# 프로젝트 개요
+<img src="/img/기획배경.jpg"/>
+4차산업혁명으로 사회 전반에서 디지털전환이 이루어지고 있습니다.
+이에 소상공인들도 선택이 아닌 필수가 되어가고 있습니다. 또한,
+연마다 개인사업자 수 증가, 개인 사업자 대출은 가게대출보다 월등히 많습니다. 이러한 상황에서 소상공인에게 대출혜택과 가게경영에 필요한 서비스들을 제공하기 위해 이 프로젝트를 기획하게 되었습니다.
 
-이것은 프로젝트 개요입니다. 글과 그림을 이용하여 개요를 설명하세요.
-
-# 2. 프로젝트 제안서
-
+# 프로젝트 기능
+<img src="/img/프로젝트 기능.png"/>
 프로젝트 제안서를 설명하세요. 발표자료와 동영상을 추가하세요. 시스템의 아키텍쳐 설명도 추가하세요.
 
+* <h3><b>사용기술</b></h3>
+Spring Boot 기반 웹 개발
+Ajax,  jQuery 를 활용한 비동기 통신과 동적태그 생성
+- 주문플랫폼(장바구니, 찜, 리뷰작성)
+SpringSecurity를 활용한 보안강화
+- 사용자 별 권한설정
+- PasswordEncoder를 활용한 비밀번호 암호화
+아임포트 api 를 활용한 신용카드 결제처리
+WebSocket 활용
+- 실시간 주문처리 및 1:1 대출상담 서비스
+여신금융협회 API 서버 구축
+- 연동 후 매출조회
+Google Vision API OCR를 활용한 매입영수증 전산등록 처리
+ApexChart.js, Chart.js 를 활용한 매입, 매출 분석 시각화 처리
+
+<h3><b>상권분석</b></h3>
+- 서울시 우리마을가게 API를 활용하여 상권이 위치한 데이터로 경영에 필요한 데이터 시각화
+매출현황 보고서 이메일 발송 처리
+- SpringSchduler와 pdfMake.js, Google SMTP
+
+# 응용기술(1)
+ <img src="/img/결제.png"/>
+
+# 응용기술(2)
+ <img src="/img/매출.png"/>
  
-[발표자료<img src="ppt.jpg"/>](/project.pptx)<br>
-<br> <br> 
-  <iframe width="424" height="238" src="https://www.youtube.com/embed/reOGfxYJre0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-# 3. 프로젝트 결과
-프로젝트 결과를 추가하세요. 발표자료. 시연동영상을 추가하세요.
-   <img src="architecture.png"/><br>
-   
-   <img src="erd.JPG"/><br>
-## 발표 ppt 
-
-[발표자료<img src="ppt.jpg"/>](/project.pptx)<br>
-## 시연 동영상 
-
-  <iframe width="424" height="238" src="https://www.youtube.com/embed/reOGfxYJre0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-# 4. 기타
-그외 프로젝트를 더욱 설명할수 있는 것들을 추가하세요
+# 응용기술(3)
+ <img src="/img/보안.png"/>
  
-# 5. 본인 소개
+# 개발환경
+OS : Windows11 pro
+IDE : sts4(SpringToolSuite4) – Frontend + Backend
+DB : Oracle 19c
 
-본인 소개를 추가하세요
+# ERD
+ <img src="/img/ERD.png"/>
+ 
+# 시스템 아키텍처
+ <img src="/img/시스템아키텍처.jpg"/>
 
-|이름 |고길동|![gdKO](/gdko.jpg)|
-|연락처 | gdko(@)kopo.ac.kr|
-|skill set| Frontend - HTML, CSS, Javascript|
-| | Backend - Java, Spring, Oracle|
-|자격증| 20xx년 정보처리기사 |
-|| 20xx년 빅데이터분석기사 |
-|| 20xx년 SQLD |
-|| 20xx년 ADsP |
-|수상| 20xx년 ICT 멘토링 프로젝트 대상 수상 (과학기술정보통신부 지원)  |
-| | 20xx년 한국폴리텍대학 벤처창업아이템경진대회 대상 수상 (고용노동부 후원)  |
-| | 20xx년 금융데이터경진대회 금상 수상|
-| | 20xx년 대학생 논문 경진대회 은상 수상|
-|특기사항|  TOEIC 990 |
-||  리니지 만랩 |
+# 서비스 아키텍처
+ <img src="/img/서비스아키텍처.jpg"/>
+
+# 본인 소개
+
+|항목|내용|설명|
+|------|---|---|
+|이름|엄재철|<img src="/img/엄재철11.2.JPG"/>|
+|연락처|이메일|abctmxk@naver.com|
+|학력사항|졸업(2018.02)|
+|경력사항|주식회사 포스텍(2019.01.01 ~ 2021.02.24)|응용 웹 프로그램 개발 및 유지보수, 그룹사 그룹웨어 유지보수 및 개발, 그룹웨어 헬프데스크 운영
+|skill set|Frontend|HTML, CSS, Javascript, jQuery
+||Backend|java
+|자격사항|정보처리기사|
+||정보보안기사(필기)|
+|교육이력|2022.03 ~ 2022.10|하나금융티아이 채용전환형 교육 1200시간( 한국폴리텍대학교 광명융합기술교육원 - 데이터분석과 )
