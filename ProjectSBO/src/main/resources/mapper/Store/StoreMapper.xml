@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="store">
+
+	<resultMap type="Store" id="StoreMap">
+		<result column="id" property="id" />
+		<result column="category" property="category" />
+		<result column="store_name" property="storeName" />
+		<result column="store_address1" property="storeAddress1" />
+		<result column="store_address2" property="storeAddress2" />
+		<result column="store_address3" property="storeAddress3" />
+		<result column="store_phone" property="storePhone" />
+		<result column="store_img" property="storeImg" />
+		<result column="store_thumb" property="storeThumb" />
+		<result column="opening_time" property="openingTime" />
+		<result column="closing_time" property="closingTime" />
+		<result column="min_delevery" property="minDelevery" />
+		<result column="delevery_time" property="deleveryTime" />
+		<result column="delevery_tip" property="deleveryTip" />
+		<result column="store_des" property="storeDes" />
+		<result column="score" property="score" />
+		<result column="review_count" property="reviewCount" />
+		<result column="boss_comment_count" property="bossCommentCount" />
+		<result column="score1" property="score1" />
+		<result column="score2" property="score2" />
+		<result column="score3" property="score3" />
+		<result column="score4" property="score4" />
+		<result column="score5" property="score5" />
+		<result column="order_count" property="orderCount" />
+		<result column="is_open" property="isOpen" />
+		<result column="bs_time" property="bsTime" />
+		<result column="is_likes" property="isLikes" />
+		<result column="list_count" property="listCount" />
+	</resultMap>
+
+
+	<resultMap type="Food" id="FoodMap">
+		<result column="id" property="id" />
+		<result column="store_id" property="storeId" />
+		<result column="food_name" property="foodName" />
+		<result column="food_price" property="foodPrice" />
+		<result column="food_dec" property="foodDec" />
+		<result column="food_img" property="foodImg" />
+		<result column="food_thumb" property="foodThumb" />
+	</resultMap>
+
+	<resultMap type="FoodOption" id="FoodOptionMap">
+		<result column="id" property="id" />
+		<result column="food_id" property="foodId" />
+		<result column="option_name" property="optionName" />
+		<result column="option_price" property="optionPrice" />
+	</resultMap>
+
+
+	<select id="storeList" resultMap="StoreMap">
+			WITH R_COUNT AS (
+	    SELECT STORE_ID
+                ,ROUND(AVG(SCORE), 1) SCORE
+                ,COUNT(REVIEW_CONTENT) REVIEW_COUNT
+                ,COUNT(BOSS_COMMENT) BOSS_COMMENT_COUNT 
+        FROM    BM_REVIEW 
+        GROUP BY STORE_ID
+	),
+	STORE AS (
+	    SELECT  S.*,
+	            T.*, 
+	            CASE WHEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) != 0 THEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) ELSE 24 END BS_TIME
+	            
+	    FROM        BM_STORE S
+	    LEFT JOIN   R_COUNT T
+	    ON          S.ID = T.STORE_ID     
+	    WHERE       CATEGORY = #{category} 
+	    AND         STORE_ADDRESS1 LIKE '${address1}%'
+	    
+	    <if test="sort == '배달 빠른 순'">
+			ORDER BY DELEVERY_TIME
+		</if>
+		
+		<if test="sort == '배달팁 낮은 순'">
+			ORDER BY DELEVERY_TIP
+		</if>
+		
+		<if test="sort == '별점 높은 순'">
+			ORDER BY SCORE
+		</if>
+		
+		<if test="sort == '리뷰 많은 순'">
+			ORDER BY REVIEW_COUNT
+		</if>
+		
+		<if test="sort == '최소 주문 금액 순'">
+			ORDER BY MIN_DELEVERY
+		</if> 
+	)
+	SELECT * FROM 
+	    (SELECT ROWNUM RN, 
+	            RESULT.* 
+	    FROM   
+	            (SELECT C.* 
+	                    ,'true' IS_OPEN 
+	            FROM    STORE C  
+	            WHERE   TO_CHAR(SYSTIMESTAMP, 'HH24') BETWEEN OPENING_TIME AND OPENING_TIME + BS_TIME
+	            
+	            UNION ALL
+		         
+	            SELECT C.*
+	                   ,'false' IS_OPEN 
+	            FROM   STORE C  
+	            WHERE  TO_CHAR(SYSTIMESTAMP, 'HH24') NOT BETWEEN OPENING_TIME AND OPENING_TIME + BS_TIME 
+		        ) RESULT
+		 ) 
+	WHERE RN BETWEEN #{firstList } AND ${lastList }	 
+	</select>
+	<!-- <select id="storeList" resultType="Store"> SELECT * FROM BM_STORE </select> -->
+
+
+	<!-- <select id="storeDetail" resultType="Store"> -->
+	<!-- 가게, 리뷰, 주문 테이블을 조인 후 리뷰의 각 별점 수, 총점의 평균, 주문횟수를 출력
+
+CASE WHEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) != 0 THEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) 
+ELSE 24 END BS_TIME부분은 현재시간이 영업시작 시간과 영업종료 시간 사이에 있을 경우 'true'를 반환하고 아닐경우 'false'를 반환찰;
+ -->
+	<select id="storeDetail" resultMap="StoreMap">
+	SELECT	RESULT.*
+			,L.IS_LIKES
+			,CASE WHEN TO_CHAR(SYSDATE,'HH24') BETWEEN OPENING_TIME AND OPENING_TIME + BS_TIME THEN 'true' ELSE 'false' END IS_OPEN
+	FROM	(SELECT S.*,
+	    			C.*,
+	    			CASE WHEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) != 0 THEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) ELSE 24 END BS_TIME
+	    	FROM 	BM_STORE S
+		        	,(SELECT * FROM  
+			            	(SELECT	ROUND(AVG(SCORE),1) SCORE
+			                ,COUNT(REVIEW_CONTENT) REVIEW_COUNT
+			                ,COUNT(BOSS_COMMENT) BOSS_COMMENT_COUNT
+			                ,COUNT(CASE WHEN SCORE=1 THEN 1 END) SCORE1
+			                ,COUNT(CASE WHEN SCORE=2 THEN 1 END) SCORE2
+			                ,COUNT(CASE WHEN SCORE=3 THEN 1 END) SCORE3
+			                ,COUNT(CASE WHEN SCORE=4 THEN 1 END) SCORE4
+			                ,COUNT(CASE WHEN SCORE=5 THEN 1 END) SCORE5
+	            	FROM 	BM_REVIEW WHERE STORE_ID = #{storeId } ) 
+	            	,(SELECT COUNT(*) LIKES_COUNT FROM BM_LIKES WHERE STORE_ID = #{storeId } )
+		            ,(SELECT SUM(ORDER_COUNT) ORDER_COUNT FROM (
+	                    SELECT COUNT(*) ORDER_COUNT FROM BM_ORDER_USER WHERE STORE_ID = #{storeId }
+	                        UNION ALL
+	                    SELECT COUNT(*) ORDER_COUNT FROM BM_ORDER_NON_USER WHERE STORE_ID = #{storeId } ))
+	        		) C
+	        WHERE 	ID = #{storeId }
+	    	) RESULT
+	LEFT JOIN   (SELECT STORE_ID, 1 IS_LIKES FROM BM_LIKES WHERE EXISTS(SELECT 1 FROM BM_LIKES WHERE USER_ID = #{userId } AND  STORE_ID = #{storeId } )) L
+    ON          RESULT.ID = L.STORE_ID 
+	</select>
+
+	<select id="foodList" resultMap="FoodMap">
+		SELECT
+		id,
+		store_id,
+		food_name,
+		food_price,
+		food_dec,
+		food_img,
+		food_thumb
+		FROM
+		bm_food
+		WHERE
+		STORE_ID = #{id }
+	</select>
+
+
+	<select id="foodOption" resultMap="FoodOptionMap">
+		SELECT
+		id,
+		food_id,
+		option_name,
+		option_price
+		FROM
+		bm_food_option
+		WHERE
+		food_id = #{foodId }
+	</select>
+
+	<insert id="reviewWrite">
+		INSERT INTO BM_REVIEW (
+		ORDER_NUM
+		,STORE_ID
+		,REVIEW_CONTENT
+		,USER_ID
+		,SCORE
+		,REVIEW_IMG
+		) VALUES (
+		${orderNum }
+		,#{storeId }
+		,#{reviewContent }
+		,#{userId}
+		,#{score}
+		,#{reviewImg }
+		)
+	</insert>
+
+
+	<resultMap type="Review" id="ReviewMap">
+		<result column="order_num" property="orderNum" />
+		<result column="store_id" property="storeId" />
+		<result column="review_content" property="reviewContent" />
+		<result column="boss_comment" property="bossComment" />
+		<result column="regi_date" property="regiDate" />
+		<result column="score" property="score" />
+		<result column="review_img" property="reviewImg" />
+		<result column="user_id" property="userId" />
+		<result column="nickname" property="nickname" />
+	</resultMap>
+
+	<select id="reviewList" resultMap="ReviewMap">
+		SELECT
+		r.order_num,
+		r.store_id,
+		r.review_content,
+		r.boss_comment,
+		r.regi_date,
+		r.score,
+		r.review_img,
+		r.user_id,
+		u.nickname
+		FROM
+		bm_review r
+		LEFT JOIN
+		bm_user u
+		ON
+		r.user_id = u.id
+		WHERE
+		r.store_id = #{id}
+		ORDER BY
+		regi_date DESC
+	</select>
+
+<!-- 리뷰수정 -->
+	<update id="reviewModify">
+		UPDATE BM_REVIEW SET
+		REVIEW_CONTENT = #{reviewContent }
+		,SCORE = #{score}
+
+		<if test="reviewImg != null">
+			,REVIEW_IMG = #{reviewImg }
+		</if>
+
+		WHERE
+		ORDER_NUM = ${orderNum }
+	</update>
+
+<!-- 찜하기 -->
+	<insert id="addLikes">
+		INSERT INTO BM_LIKES (
+		USER_ID
+		,STORE_ID
+		) VALUES (
+		#{userId }
+		,#{storeId }
+		)
+	</insert>
+<!-- 찜하기 -->
+	<delete id="deleteLikes">
+		DELETE BM_LIKES WHERE
+		USER_ID = #{userId } AND
+		STORE_ID = #{storeId }
+	</delete>
+	
+	<!-- 찜한 가게목록 -->
+	<select id="likesList" resultMap="StoreMap">
+    WITH R_COUNT AS (
+       SELECT  R.STORE_ID 
+               ,ROUND(R.SCORE, 1) SCORE
+               ,R.REVIEW_COUNT
+               ,R.BOSS_COMMENT_COUNT 
+       FROM 
+               (SELECT STORE_ID
+                       ,AVG(SCORE) SCORE
+                       ,COUNT(REVIEW_CONTENT) REVIEW_COUNT
+                       ,COUNT(BOSS_COMMENT) BOSS_COMMENT_COUNT 
+               FROM    BM_REVIEW GROUP BY STORE_ID ) R  
+   ),
+   STORE AS (
+       SELECT  	S.*
+                   ,T.*
+                   ,L.USER_ID
+                   ,L.LIKES_DATE
+                   ,CASE WHEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) != 0 THEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) ELSE 24 END BS_TIME
+       FROM		BM_STORE S
+       LEFT JOIN 	R_COUNT T
+       ON	 		S.ID = T.STORE_ID
+       LEFT JOIN 	BM_LIKES L
+       ON 			S.ID = L.STORE_ID 
+       WHERE 		USER_ID = #{userId }
+   )
+   
+   SELECT * FROM
+       (SELECT 	C.*
+                   ,'true' IS_OPEN
+       FROM    	STORE C 
+       WHERE    	(TO_CHAR(SYSTIMESTAMP, 'HH24') 
+       BETWEEN 	OPENING_TIME 
+       AND     	OPENING_TIME + BS_TIME)
+   UNION ALL
+       SELECT  	C.*
+                   ,'false' IS_OPEN 
+       FROM    	STORE C 
+       WHERE 	  	(TO_CHAR(SYSTIMESTAMP, 'HH24') 
+       NOT BETWEEN OPENING_TIME 
+       AND     	OPENING_TIME + BS_TIME )
+       ) 
+   ORDER BY LIKES_DATE DESC
+   </select>
+   
+   <!-- 비회원 찜 하기 처리 -->
+	<select id="likesListNonUser" resultMap="StoreMap">
+	    WITH R_COUNT AS (
+	       SELECT  R.STORE_ID 
+	               ,ROUND(R.SCORE, 1) SCORE
+	               ,R.REVIEW_COUNT
+	               ,R.BOSS_COMMENT_COUNT 
+	       FROM 
+	               (SELECT STORE_ID
+	                       ,AVG(SCORE) SCORE
+	                       ,COUNT(REVIEW_CONTENT) REVIEW_COUNT
+	                       ,COUNT(BOSS_COMMENT) BOSS_COMMENT_COUNT 
+	               FROM    BM_REVIEW GROUP BY STORE_ID ) R  
+	   ),
+	   STORE AS (
+	       SELECT  	S.*
+	                   ,T.*
+	                   ,CASE WHEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) != 0 THEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) ELSE 24 END BS_TIME
+	       FROM		BM_STORE S
+	       LEFT JOIN 	R_COUNT T
+	       ON	 		S.ID = T.STORE_ID
+	       WHERE 		ID IN(${likes })
+	   )
+	   
+	   SELECT * FROM
+	       (SELECT 	C.*
+	                   ,'true' IS_OPEN
+	       FROM    	STORE C 
+	       WHERE    	(TO_CHAR(SYSTIMESTAMP, 'HH24') 
+	       BETWEEN 	OPENING_TIME 
+	       AND     	OPENING_TIME + BS_TIME)
+	   UNION ALL
+	       SELECT  	C.*
+	                   ,'false' IS_OPEN 
+	       FROM    	STORE C 
+	       WHERE 	  	(TO_CHAR(SYSTIMESTAMP, 'HH24') 
+	       NOT BETWEEN OPENING_TIME 
+	       AND     	OPENING_TIME + BS_TIME )
+	       ) 
+	   </select>
+	   
+	   
+	   <select id="storeSearch" resultMap="StoreMap">
+	    WITH R_COUNT AS (
+	       SELECT  R.STORE_ID 
+	               ,ROUND(R.SCORE, 1) SCORE
+	               ,R.REVIEW_COUNT
+	               ,R.BOSS_COMMENT_COUNT 
+	       FROM 
+	               (SELECT STORE_ID
+	                       ,AVG(SCORE) SCORE
+	                       ,COUNT(REVIEW_CONTENT) REVIEW_COUNT
+	                       ,COUNT(BOSS_COMMENT) BOSS_COMMENT_COUNT 
+	               FROM    BM_REVIEW GROUP BY STORE_ID ) R  
+	   ),
+	   STORE AS (
+	       SELECT  	S.*
+	                   ,T.*
+	                   ,CASE WHEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) != 0 THEN MOD(24 - S.OPENING_TIME + S.CLOSING_TIME, 24) ELSE 24 END BS_TIME
+	       FROM		BM_STORE S
+	       LEFT JOIN 	R_COUNT T
+	       ON	 		S.ID = T.STORE_ID
+	       WHERE       STORE_ADDRESS1 LIKE '${address}%'
+	       AND         STORE_NAME LIKE '%${keyword}%'
+	   )
+	   
+	   SELECT * FROM 
+	       (SELECT ROWNUM RN,
+	               COUNT(*) OVER() list_count, 
+	               RESULT.* 
+	       FROM   
+	               (SELECT C.* 
+	                       ,'true' IS_OPEN 
+	               FROM    STORE C  
+	               WHERE   TO_CHAR(SYSTIMESTAMP, 'HH24') BETWEEN OPENING_TIME AND OPENING_TIME + BS_TIME
+	               
+	               UNION ALL
+	                
+	               SELECT C.*
+	                      ,'false' IS_OPEN 
+	               FROM   STORE C  
+	               WHERE  TO_CHAR(SYSTIMESTAMP, 'HH24') NOT BETWEEN OPENING_TIME AND OPENING_TIME + BS_TIME 
+	               ) RESULT
+	        ) 
+	   WHERE RN BETWEEN #{firstList } AND ${lastList }	 
+	       
+   </select>
+	   
+
+
+
+</mapper>

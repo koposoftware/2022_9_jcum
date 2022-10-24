@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="admin">
+ 
+	<insert id="pointUpdate" >
+		INSERT INTO BM_POINT (
+			USER_ID
+			,INFO
+			,POINT
+		) VALUES (
+			#{userId }
+			,#{info }
+			,#{point }
+		)
+	</insert>
+	
+	
+	<resultMap type="Store" id="StoreMap">
+		<result column="id" property="id" />
+		<result column="category" property="category" />
+		<result column="store_name" property="storeName" />
+		<result column="store_address1" property="storeAddress1" />
+		<result column="store_address2" property="storeAddress2" />
+		<result column="store_address3" property="storeAddress3" />
+		<result column="store_phone" property="storePhone" />
+		<result column="store_img" property="storeImg" />
+		<result column="store_thumb" property="storeThumb" />
+		<result column="opening_time" property="openingTime" />
+		<result column="closing_time" property="closingTime" />
+		<result column="min_delevery" property="minDelevery" />
+		<result column="delevery_time" property="deleveryTime" />
+		<result column="delevery_tip" property="deleveryTip" />
+		<result column="store_des" property="storeDes" />
+		<result column="score" property="score" />
+		<result column="review_count" property="reviewCount" />
+		<result column="boss_comment_count" property="bossCommentCount" />
+		<result column="score1" property="score1" />
+		<result column="score2" property="score2" />
+		<result column="score3" property="score3" />
+		<result column="score4" property="score4" />
+		<result column="score5" property="score5" />
+		<result column="order_count" property="orderCount" />
+		<result column="is_open" property="isOpen" />
+		<result column="bs_time" property="bsTime" />
+		<result column="is_likes" property="isLikes" />
+		<result column="list_count" property="listCount" />
+	</resultMap>
+	
+	
+	<select id="myStore" resultMap="StoreMap">
+			WITH R_COUNT AS (
+			    SELECT STORE_ID
+		                ,ROUND(AVG(SCORE), 1) SCORE
+		                ,COUNT(REVIEW_CONTENT) REVIEW_COUNT
+		                ,COUNT(BOSS_COMMENT) BOSS_COMMENT_COUNT 
+		        FROM    BM_REVIEW 
+		        GROUP BY STORE_ID
+			),
+			STORE AS (
+			    SELECT  S.*,
+			            T.*
+			    FROM        BM_STORE S
+			    LEFT JOIN   R_COUNT T
+			    ON          S.ID = T.STORE_ID
+		        LEFT JOIN   BM_MY_STORE M
+		        ON          S.ID = M.STORE_ID
+		        WHERE       M.USER_ID = #{user_id }
+			)
+			SELECT * FROM STORE
+	</select>
+	
+	<!-- AOP 설정 관련 및 운영하고 싶은 가게 가져오기 -->
+	<select id="getMyStoreId" resultType="long">
+		SELECT STORE_ID FROM BM_MY_STORE WHERE USER_ID = #{userId } 
+	</select>
+	
+	<!-- 가게 정보 수정 처리 -->
+	<update id="storeInfoUpdate">
+		UPDATE BM_STORE SET
+			CATEGORY = #{category }
+			,STORE_NAME = #{storeName }
+			,STORE_ADDRESS1 = #{storeAddress1 }
+			,STORE_ADDRESS2 = #{storeAddress2 }
+			,STORE_ADDRESS3 = #{storeAddress3 }
+			,STORE_PHONE = #{storePhone }
+			,STORE_IMG = #{storeImg }
+			,STORE_THUMB = #{storeThumb }
+			,OPENING_TIME = #{openingTime }
+			,CLOSING_TIME = #{closingTime }
+			,MIN_DELEVERY = #{minDelevery }
+			,DELEVERY_TIME = #{deleveryTime }
+			,DELEVERY_TIP = #{deleveryTip }
+			,STORE_DES = #{storeDes }
+		WHERE
+			ID = #{id }  
+	</update>
+
+	<!-- 메뉴추가 부분
+	SELECT FOOD_ID_SEQ.NEXTVAL FROM DUAL을 실행해 foodId를 생성
+	이 foodId를 keyProperty에 설정한 id라는 변수로 사용 
+	selectKey의 order를 before로 하게 되면 insert가 실행되기 전에 실행
+	insert문을 실행하고 난 뒤 AdminDAOImp의 addMenu메서드의 파라미터로 전달한 Food클래스 id에 세팅됩니다
+	 -->
+	<insert id="addMenu">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT FOOD_ID_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO BM_FOOD (
+			ID
+			,STORE_ID
+			,FOOD_NAME
+			,FOOD_PRICE
+			,FOOD_DEC
+			,FOOD_IMG
+			,FOOD_THUMB
+			) VALUES (
+			#{id }
+			,#{storeId }
+			,#{foodName }
+			,#{foodPrice }
+			,#{foodDec }
+			,#{foodImg }
+			,#{foodThumb }
+			)
+	</insert>
+	
+	<insert id="addMenuOption">
+		INSERT INTO BM_FOOD_OPTION 
+		<foreach collection="list" item="item"  separator="UNION ALL" >
+				SELECT	GET_OPTION_SEQ()
+						,#{item.foodId }
+						,#{item.optionName }
+						,#{item.optionPrice } 
+				FROM	DUAL
+		</foreach>
+	</insert>
+	
+	<!-- 메뉴삭제 -->
+	<delete id="deleteMenuOption">
+		DELETE BM_FOOD_OPTION WHERE FOOD_ID = #{foodId }
+	</delete>
+
+	
+	
+	<!-- 메뉴 수정 -->
+	<update id="updateMenu">
+		DECLARE BEGIN
+			UPDATE	BM_FOOD 
+			SET		STORE_ID = #{food.storeId }
+					,FOOD_NAME = #{food.foodName }
+					,FOOD_PRICE = #{food.foodPrice }
+					,FOOD_DEC = #{food.foodDec }
+					,FOOD_IMG = #{food.foodImg }
+					,FOOD_THUMB = #{food.foodThumb }
+			WHERE	ID = #{food.id };
+		 
+			<if test="optionList != null">
+				DELETE BM_FOOD_OPTION WHERE FOOD_ID = #{food.id } AND ID NOT IN
+			<foreach collection="optionList" item="item" open="(" close=");" separator=","  >
+				${item.optionId }
+			</foreach>
+			
+			<foreach collection="optionList" item="item" separator=";" close=";">
+				<if test="item.optionId == -1">
+					INSERT INTO	BM_FOOD_OPTION
+					VALUES		(GET_OPTION_SEQ()
+								,#{food.id }
+								,#{item.optionName }
+								,#{item.optionPrice }) 
+				</if>
+				
+				<if test="item.optionId != -1">
+					UPDATE	BM_FOOD_OPTION 
+					SET		OPTION_NAME = #{item.optionName }
+							,OPTION_PRICE = #{item.optionPrice }
+					WHERE	FOOD_ID = #{food.id }
+					AND		ID = #{item.optionId }		
+				</if>
+			</foreach>
+			</if>
+			
+		END;	
+	</update>
+
+	<!-- 메뉴삭제 -->
+	<delete id="deleteMenu">
+		DELETE BM_FOOD WHERE STORE_ID = ${storeId } AND ID IN 
+		<foreach collection="deleteNumber" item="arr" open="(" close=")" separator="," >
+			${arr }
+		</foreach>
+	</delete>
+	
+	
+
+	
+	<!-- 댓글답장하기 -->
+	<update id="bossComment">
+		UPDATE BM_REVIEW SET
+			BOSS_COMMENT = #{bossComment }
+		WHERE
+			ORDER_NUM = #{orderNum }
+		AND
+			STORE_ID = #{storeId }
+	</update>
+
+	
+	
+	<resultMap type="OrderList" id="OrderListMap">
+		<result column="list_count" property="listCount"/>
+		<result column="order_num" property="orderNum"/>
+		<result column="user_id" property="userId"/>
+		<result column="order_date" property="orderDate"/>
+		<result column="pay_method" property="payMethod"/>
+		<result column="delevery_status" property="deleveryStatus"/>
+		<result column="delevery_address1" property="deleveryAddress1"/>
+		<result column="delevery_address2" property="deleveryAddress2"/>
+		<result column="delevery_address3" property="deleveryAddress3"/>
+		<result column="store_id" property="storeId"/>
+		<result column="total_price" property="totalPrice"/>
+		<result column="used_point" property="usedPoint"/>
+		<result column="request" property="request"/>
+		<result column="food_info" property="foodInfo"/>
+		<result column="store_name" property="storeName"/>
+		<result column="store_img" property="storeImg"/>
+		<result column="store_thumb" property="storeThumb"/>
+		<result column="delevery_tip" property="deleveryTip"/>
+		<result column="phone" property="phone"/>
+		<result column="count1" property="count1"/>
+		<result column="count2" property="count2"/>
+		<result column="rn" property="rn"/>
+	</resultMap>
+	
+	
+	<select id="orderList" resultMap="OrderListMap">
+	WITH T_ORDER AS ( 
+	    SELECT * FROM (
+	    	SELECT * FROM BM_ORDER_USER UNION ALL SELECT * FROM BM_ORDER_NON_USER) WHERE STORE_ID = #{storeId }
+	),
+	T_DETAIL AS (
+	    SELECT  ORDER_NUM, 
+	            LISTAGG(FOOD_INFO, '/') WITHIN GROUP(ORDER BY FOOD_INFO) FOOD_INFO
+	    FROM BM_ORDER_DETAIL_USER N
+	    GROUP BY    ORDER_NUM
+	    UNION ALL
+	    SELECT  ORDER_NUM, 
+	            LISTAGG(FOOD_INFO, '/') WITHIN GROUP(ORDER BY FOOD_INFO) FOOD_INFO
+	    FROM BM_ORDER_DETAIL_NON_USER N
+	    GROUP BY    ORDER_NUM
+	)
+	 SELECT   COUNT1
+              ,COUNT2
+              ,O.*
+              ,D.FOOD_INFO
+              ,S.STORE_NAME
+              ,S.DELEVERY_TIP
+      FROM (
+          SELECT  #{storeId } AS STORE_ID
+                          ,A.COUNT COUNT1
+                          ,B.COUNT COUNT2
+                  FROM    (SELECT COUNT(*) COUNT FROM T_ORDER WHERE DELEVERY_STATUS = '주문접수 대기 중') A,
+                          (SELECT COUNT(*) COUNT FROM T_ORDER WHERE DELEVERY_STATUS LIKE '배달 준비 중%') B
+      ) ORDER_COUNT
+      LEFT JOIN
+      (SELECT * FROM
+          (SELECT ROWNUM RN, T.* FROM (
+              SELECT * FROM T_ORDER WHERE DELEVERY_STATUS LIKE '${list }%' ORDER BY ORDER_DATE) T ) 
+       WHERE RN BETWEEN #{firstList } AND #{lastList }
+       )O       
+      ON          ORDER_COUNT.STORE_ID = O.STORE_ID
+      LEFT JOIN   T_DETAIL D      
+      ON          O.ORDER_NUM  = D.ORDER_NUM
+      LEFT JOIN   BM_STORE S
+      ON          O.STORE_ID = S.ID
+      ORDER BY ORDER_DATE
+	</select>
+	
+	
+	<!-- 주문접수 처리 -->
+	<update id="orderAccept">
+		<if test="userId == 0">
+			UPDATE BM_ORDER_NON_USER SET
+		</if>
+		<if test="userId != 0">
+			UPDATE BM_ORDER_USER SET
+		</if>
+			DELEVERY_STATUS = '배달 준비 중(약 ${time}분 후에 도착)'
+			WHERE ORDER_NUM = #{orderNum }
+	</update>
+	
+	<!-- 주문 완료 처리 -->
+	<update id="orderComplete">
+		<if test="userId == 0">
+			UPDATE BM_ORDER_NON_USER SET
+		</if>
+		<if test="userId != 0">
+			UPDATE BM_ORDER_USER SET
+		</if>
+		DELEVERY_STATUS = '배달 완료'
+		WHERE ORDER_NUM = #{orderNum }
+	</update>
+	
+	
+	<resultMap type="SalesDetail" id="SalesDetailMap">
+		<result column="total_price" property="totalPrice" />
+		<result column="food_info" property="foodInfo" />
+	</resultMap>
+	
+	<!-- 오늘 매출 -->
+	<select id="salesDetail" resultMap="SalesDetailMap">
+		WITH T_ORDER AS (
+		    SELECT * FROM (
+		        SELECT ORDER_NUM, STORE_ID, ORDER_DATE, TOTAL_PRICE, DELEVERY_STATUS FROM BM_ORDER_USER
+		        UNION ALL
+		        SELECT ORDER_NUM, STORE_ID, ORDER_DATE, TOTAL_PRICE, DELEVERY_STATUS FROM BM_ORDER_NON_USER
+		    )
+		    WHERE     STORE_ID = #{storeId }
+		    AND   	  DELEVERY_STATUS = '배달 완료'
+		    <if test="date == null">
+		    AND   TO_CHAR(ORDER_DATE, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+		    </if>
+		    
+		    <if test="date != null">
+		    AND   TO_CHAR(ORDER_DATE, 'YYYY-MM-DD') = #{date }
+		    </if>
+		    
+		),
+		T_DETAIL AS (
+		    SELECT  ORDER_NUM, 
+		            LISTAGG(FOOD_INFO, '/') WITHIN GROUP(ORDER BY FOOD_INFO) FOOD_INFO
+		    FROM BM_ORDER_DETAIL_USER N
+		    GROUP BY    ORDER_NUM
+		    UNION ALL
+		    SELECT  ORDER_NUM, 
+		            LISTAGG(FOOD_INFO, '/') WITHIN GROUP(ORDER BY FOOD_INFO) FOOD_INFO
+		    FROM BM_ORDER_DETAIL_NON_USER N
+		    GROUP BY    ORDER_NUM
+		)
+		SELECT      TOTAL_PRICE
+		            ,FOOD_INFO
+		FROM        T_ORDER O
+		LEFT JOIN   T_DETAIL D
+		ON          O.ORDER_NUM = D.ORDER_NUM
+	</select>
+	
+	
+	<resultMap type="Sales" id="SalesMap">
+		<result column="order_date" property="orderDate" />
+		<result column="total" property="total" />
+	</resultMap>
+	
+	<!-- 매출그래프 -->
+	<select id="sales" resultMap="SalesMap">
+	
+		WITH T_ORDER AS (
+		    SELECT  STORE_ID
+		    		,TO_DATE(ORDER_DATE) ORDER_DATE
+	                ,TOTAL_PRICE
+	        FROM (
+		        SELECT TO_CHAR(ORDER_DATE, 'YYYY/MM/DD') ORDER_DATE, STORE_ID, TOTAL_PRICE, DELEVERY_STATUS FROM BM_ORDER_USER
+		        UNION ALL
+		        SELECT TO_CHAR(ORDER_DATE, 'YYYY/MM/DD') ORDER_DATE, STORE_ID, TOTAL_PRICE, DELEVERY_STATUS FROM BM_ORDER_NON_USER
+		    )
+		    WHERE	STORE_ID = #{storeId }
+		    AND   	DELEVERY_STATUS = '배달 완료'
+ 		    <choose>
+		    	<when test="term == 'year'">
+		    	AND   ORDER_DATE BETWEEN TRUNC(TO_DATE(#{date }), 'YYYY') AND LAST_DAY(#{date })
+		    	</when>
+		    
+		   		<otherwise>
+		    	AND   ORDER_DATE BETWEEN TRUNC(TO_DATE(#{date }), 'MM') AND LAST_DAY(#{date })
+		    	</otherwise>
+		    </choose>
+		)
+		<if test="term == 'month'">
+	    SELECT	CAL.ORDER_DATE
+	    		,SUM(O.TOTAL_PRICE) TOTAL 
+	 	FROM (
+	 		
+	        SELECT FIRST_DAY + LEVEL -1 ORDER_DATE
+	        FROM    (
+	            SELECT TRUNC(TO_DATE(#{date }), 'MM') FIRST_DAY FROM DUAL
+	        ) 
+	        CONNECT BY FIRST_DAY + LEVEL -1 <![CDATA[ <= ]]> LAST_DAY(#{date })
+	    ) CAL
+	    LEFT JOIN   T_ORDER O
+	    ON          CAL.ORDER_DATE = O.ORDER_DATE
+	    GROUP BY ROLLUP(CAL.ORDER_DATE) 
+	    ORDER BY ORDER_DATE
+		</if>
+		
+		
+		<if test="term == 'week'">
+	    SELECT	CAL.ORDER_DATE
+	    		,SUM(O.TOTAL_PRICE) TOTAL 
+	 	FROM (
+	 		
+	        SELECT FIRST_DAY + LEVEL -1 ORDER_DATE
+	        FROM    (
+	            SELECT TRUNC(SYSDATE, 'IW') FIRST_DAY FROM DUAL
+	        ) 
+	        CONNECT BY FIRST_DAY + LEVEL <![CDATA[ <= ]]> FIRST_DAY + 7 
+	    ) CAL
+	    LEFT JOIN   T_ORDER O
+	    ON          CAL.ORDER_DATE = O.ORDER_DATE
+	    GROUP BY ROLLUP(CAL.ORDER_DATE) 
+	    ORDER BY ORDER_DATE
+	   	</if>
+	        
+	        
+	        
+	        
+		<if test="term == 'year'">
+	    SELECT	TRUNC(CAL.ORDER_DATE, 'MM') ORDER_DATE
+	    		,SUM(O.TOTAL_PRICE) TOTAL 
+	 	FROM (
+	       SELECT ADD_MONTHS(FIRST_DAY, LEVEL -1) ORDER_DATE
+	        FROM    (
+	            SELECT TRUNC(SYSDATE, 'YYYY') FIRST_DAY FROM DUAL
+	        ) 
+	        CONNECT BY LEVEL <![CDATA[ <= ]]> 12
+	    ) CAL
+	    LEFT JOIN   T_ORDER O
+	    ON          CAL.ORDER_DATE = TRUNC(O.ORDER_DATE, 'MM')
+	    GROUP BY ROLLUP(TRUNC(CAL.ORDER_DATE, 'MM')) 
+	    ORDER BY ORDER_DATE
+	    </if>
+	
+	</select>
+	
+	
+
+	<!-- 오늘 매출 -->
+	<select id="weekMenu" resultMap="SalesDetailMap">
+		WITH T_ORDER AS(
+		SELECT * FROM (
+		SELECT ORDER_NUM, STORE_ID, ORDER_DATE, TOTAL_PRICE, DELEVERY_STATUS FROM
+		BM_ORDER_USER
+		UNION ALL
+		SELECT ORDER_NUM, STORE_ID, ORDER_DATE, TOTAL_PRICE, DELEVERY_STATUS FROM
+		BM_ORDER_NON_USER
+		)
+		WHERE STORE_ID = 205
+		AND DELEVERY_STATUS = '배달 완료'
+		AND TO_CHAR(ORDER_DATE, 'YY/MM/DD') BETWEEN '${startDt}' and '${endDt}'
+		),
+		T_DETAIL AS (
+		SELECT ORDER_NUM,
+		LISTAGG(FOOD_INFO, '/') WITHIN GROUP(ORDER BY FOOD_INFO) FOOD_INFO
+		FROM BM_ORDER_DETAIL_USER N
+		GROUP BY ORDER_NUM
+		UNION ALL
+		SELECT ORDER_NUM,
+		LISTAGG(FOOD_INFO, '/') WITHIN GROUP(ORDER BY FOOD_INFO) FOOD_INFO
+		FROM BM_ORDER_DETAIL_NON_USER N
+		GROUP BY ORDER_NUM
+		)
+
+		SELECT TOTAL_PRICE
+		,FOOD_INFO
+		,O.ORDER_DATE
+		FROM T_ORDER O
+		LEFT JOIN T_DETAIL D
+		ON O.ORDER_NUM = D.ORDER_NUM
+		where FOOD_INFO is not null
+		order by O.ORDER_DATE
+	</select>
+	
+	
+</mapper>

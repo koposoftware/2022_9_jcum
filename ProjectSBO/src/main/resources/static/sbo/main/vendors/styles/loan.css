@@ -1,0 +1,105 @@
+@charset "UTF-8";
+
+				<!-- 내부 스타일 따로 적용 -->
+		<style>
+.btn-toolbar>.btn, .btn-toolbar>.btn-group, .btn-toolbar>.input-group {
+	margin-left: 5px;
+}
+
+.list-group {
+	box-shadow: 0px 11px 23px 5px rgba(0, 0, 0, 0.13);
+}
+
+.list-group-item {
+	background-color: rgba(255, 255, 255, 0.7);
+	border: soild #000 1px;
+}
+
+.btn-toolbar {
+	margin-top: 10px;
+}
+
+/* ==== SOME BOOTSTRAP MODS/STYLING ==== */
+.btn-default {
+	background-color: rgba(255, 255, 255, 0.3);
+	border-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn {
+	padding: 6px 18px;
+}
+
+.subject *{
+	font-size : 13px;
+}
+.subject{
+	padding-top: 18px;
+}
+.subject div{
+	clear: both;
+    border-top: 1px solid #e3e3e3;
+    border-bottom: 1px solid #e3e3e3;
+    padding: 4px 0;
+}
+
+.subject dl{
+	clear:both;
+}
+.subject dt {
+	float: left;
+	color: #666;
+	line-height: 24px;
+	background: url(/sbo/main/vendors/images/layout/bu_list_txt_dep2.gif) no-repeat left 10px;
+	padding-left: 5px;
+	letter-spacing: -1px;
+}
+.subject dd{
+
+    margin-left: 110px;
+    line-height: 24px;
+    letter-spacing: -1px;
+
+}
+.subject dt{
+	font-weight: 900;
+}
+
+/* 상품설명 부분 */
+.po-detail-info {
+    clear: both;
+    margin-left: 29px;
+    overflow:hidden;
+}
+dl{font-size:12px;}
+#tab-cont-1.tab-cont-1 dl.po-detail-info dt {
+    padding-left: 0;
+    background: transparent;
+    font-weight: bold;
+    padding-right: 10px;
+}
+.po-detail-info dt {
+    clear: both;
+    float: left;
+    width: 140px;
+    color: #333;
+    font-size: 14px;
+    padding-left: 10px;
+    padding-top: 14px;
+}
+.po-detail-info dd {
+    float: left;
+    width: 744px;
+    font-size: 14px;
+    padding-top: 14px;
+}
+.color-1{
+color:red;}
+.blue{
+color:blue;}
+
+.po-detail-info li {
+    background: url(/sbo/main/vendors/images/layout/bu_list_txt_dep2.gif) no-repeat left 9px;
+    padding-left: 10px;
+    font-size: 14px;
+    line-height: 19px;
+}

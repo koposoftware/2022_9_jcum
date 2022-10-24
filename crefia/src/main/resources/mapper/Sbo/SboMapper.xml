@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sbo">
+
+	<insert id="purchaseWrite">
+		insert into sbo_purchase (
+		PURCHASENO
+		,RECEIPTDATE
+		,REGDATE
+		,AMOUNT
+		,VAT
+		,SUM
+		,STORENAME
+		,BUSINESSNO
+		,RECEIPOPTION
+		,PURPOSEMEMO
+		) VALUES (
+		${purchaseNo }
+		,#{receiptDate }
+		,sysdate
+		,#{amount}
+		,#{vat}
+		,#{sum }
+		,#{storeName }
+		,#{businessNo }
+		,#{receipOption }
+		,#{purposeMemo }
+		
+		)
+	</insert>
+
+	<select id="salesToday" resultType="java.util.HashMap">
+		select substr(order_date, 0,8) as today, count(delevery_status) as cnt, sum(total_price) as sum
+		  from bm_order_user
+		where delevery_status = '배달 완료' and substr(order_date, 0,8) in ('${today}','${pastday}')
+		group by substr(order_date, 0,8)
+		order by substr(order_date, 0,8)
+	</select>
+	
+	<select id="salesAmPmCnt" resultType="java.util.HashMap">
+		select substr(order_date, 0,8) as today, to_char(order_date, 'pm') as time, count(*) as cnt, sum(total_price) as sum
+		from bm_order_user
+		where delevery_status = '배달 완료' and substr(order_date, 0,8) in ('${yesterDay}', '${pastyesterDay}')
+		group by substr(order_date, 0,8), to_char(order_date, 'pm')
+		order by substr(order_date, 0,8)
+	</select>
+	
+	<select id="salesWeekSum" resultType="java.util.HashMap">
+		select substr(order_date, 0,8) as today , count(delevery_status) as cnt, sum(total_price) as sum  from bm_order_user
+		where delevery_status = '배달 완료' and substr(order_date, 0,8) BETWEEN '${todayWeek}' and '${today}' 
+		group by substr(order_date, 0,8)
+		order by substr(order_date, 0,8)
+	</select>
+	
+	<select id="salesRangePurchaseCnt" resultType="java.util.HashMap">
+		select 
+		REGDATE as today,count(regdate) as cnt, to_char(to_date(regdate), 'dy') as day
+		from sbo_purchase
+		where regdate BETWEEN '${startDt}' and '${endDt}'
+		group by regdate
+		order by regdate
+	</select>
+	
+	<select id="salesRangeCnt" resultType="java.util.HashMap">
+		select substr(order_date, 0,8) as today , count(delevery_status) as cnt, to_char(to_date(substr(order_date, 0,8)), 'dy') as day from bm_order_user
+		where delevery_status = '배달 완료' and substr(order_date, 0,8) BETWEEN '${startDt}' and '${endDt}' 
+		group by substr(order_date, 0,8)
+		order by substr(order_date, 0,8)
+	</select>
+	
+	<select id="onSitePayment" resultType="java.util.HashMap">
+		select substr(order_date, 0,8) as today , count(pay_method) as cnt  from bm_order_user
+		where pay_method = '현장결제' and delevery_status = '배달 완료' and substr(order_date, 0,8) BETWEEN '${startDt}' and '${endDt}' 
+		group by substr(order_date, 0,8)
+		order by substr(order_date, 0,8)
+	</select>
+	
+	
+	<select id="daysAvgPay" resultType="java.util.HashMap">
+		select substr(order_date, 0,8) as today , count(delevery_status) as cnt, sum(total_price) as sum, 
+		to_char(to_date(substr(order_date, 0,8)), 'dy') as day, round(sum(total_price)/count(delevery_status),0) as avg
+		from bm_order_user
+		where delevery_status = '배달 완료' and substr(order_date, 0,8) BETWEEN '${startDt}' and '${endDt}'
+		group by substr(order_date, 0,8)
+		order by substr(order_date, 0,8)
+	</select>
+
+	
+
+
+</mapper>

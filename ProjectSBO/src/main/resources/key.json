@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "digital-bonfire-361112",
+  "private_key_id": "96f465ee92279d966d60e8838b94287ef339dfd3",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDYg09EZMEdcSJZ\n7Ia9R3k88ZOsyIFAcaWdWgVcigM+uxlrSlddyNRJzOclx4tDFQMEHuDfrDoXpNuy\neG702Sv2Pczkf2wTOMuGYTVsJbiJn73PjdrWGOLg+QPyefXt+8VkejsTgHanU/GL\nPQuM9TsxPyo5wQ2D1cYKwTvy2Qsu5eICBuCBRFhEsZowMcRU5CJfF2votg9ep3ye\ncLHmJBYTLbQXHFJLYz7/twEXj4YZq1PqUVxHqIILJOF2+qUi5me6lQYtuM2nRgys\nFyLQBG82BhvgciCRuzrQwuECNXMXXYukJbx1VqhBrdPMBxcets/Hyhzuj0xg6wyJ\nyw/FwkvTAgMBAAECggEANkNKlYCO6bsV+eWOq1eDaiO9eBtUUXtqH3KVT2kDgTBR\nIZOjK80Ob2ScNdq561kTxW+bulMmyBA4Q5VtcY4QN4mrlUTeKD8euxIX2n/lrRBM\n+Py7cNcR3YJrW9T3LurfwNvlfHDAzBT8v4HQKEa5zBDhm1Hn+jeUh9OAG9ALvnfG\nhJbE6K/diqu6a9R8A2UNnTuHKO4Vm1z2bQw8cwMM1R/+ZloMSrpkDU5Xp1hDxxnf\njACr4iCGKx0uebrx8usNcLoVwUxrQI96auyFBl+evffMCzA3yV+a0THdTGxGDrEM\ne2SZybg3ufUvqeDJdOQt7L2ZVQDmiGMHPMzSmAZ0OQKBgQD9hu3D4dg0hfEXPJRa\nsItMKw8u0qrADWR6mL+rcc6+D/Pfm28uJ7PZZo0xq3e8sRveBM0/cJMUD0yYeyhM\nqxLkIRBCt4cOJUh0YS2pjaes/0xK9ypaFQoRe66Hnczb5B4k1rLK6++1TJG2N8hZ\n1uldDCqWVTlHXlN7j9xxxeX2FQKBgQDan/RaLimZdTKNhpufamG0fH1Ajf1+BY07\nUPIqvBlfDgOdHcODO6lOYUANVa54YwBq8Qfc5Nr6P2+VswdL1HgosKPZnndAx0JM\nXfGITSdEBTdgbWYXKqQo5iiuZM4MSGFwTZiEvdFZAweMRROniwPYnqv6VMkBM+G+\n9Sluvr3cRwKBgCAho6y5yN8PQrkBMoQz79OdeXUjugRRLjTjexdNezhXaT8jwfmF\niqO4/ZgX9Try72c6EJFDwUA/mCOTKE5fOCu1jQwHmpROYVpunozoqSGh0ZeGr9Vu\n6THCDSKe+0G7LZ7Znxtcv6qoo6cGdtv8AuOKETOwZWwIJmh4mSXKQRTpAoGBALVt\nHChiOp9gxKzx0d9/NsnCrWaO7phQHx3kVLLmGd/qD1GpS4ByWFP1HGR0gC7jaYtV\nroK/YIFfd0gxo5JoJbcOr0p+2NPnB7u8Eh5ceINYGNZqstfyyPwv0/61JNDImCPM\nIQ+3Pi2x9+eNw3u8P1ragjlhdtUKqwH/DX0byQ8tAoGAQkkPVgRqlW3RWpjH+WuR\nHxO/xt/TkfQlp3XJ4WF2FzL2apwPMWIuWKUxIi3sVjmU/x0dn+BHS7xT77POqCHP\n92yOwhxhIwMzRe1Iu4j3QC+v+vUmpgoJYJvwB0wOptl0e26cERICzd+OOSHqmo5C\nJ8n+V68G1FBts+GKmRAPMQs=\n-----END PRIVATE KEY-----\n",
+  "client_email": "googleapi@digital-bonfire-361112.iam.gserviceaccount.com",
+  "client_id": "111394524388871432793",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/googleapi%40digital-bonfire-361112.iam.gserviceaccount.com"
+}
