@@ -14,7 +14,7 @@
    [제안발표자료](/하나상생플랫폼_최종발표.pptx)<br>
    
    ## 시연 동영상
-   [![영상](youtubecover.jpg)](https://www.youtube.com/watch?v=Gox0fXPfm4w)
+   [![영상](youtubecover.jpg)](https://www.youtube.com/watch?v=0TQK4wKuwW8)
    <br>
    *사진을 누르시면 영상 유튜브 사이트로 이동합니다
 <br><br>
